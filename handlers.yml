@@ -1,0 +1,31 @@
+- hosts: all
+  tasks: 
+         - name: Install the webserver
+           package:
+             name: httpd
+             state: present
+           register: httpd_status
+         - name: Copy the content in document root
+           copy:
+             dest: /var/www/html/task.html
+             content: "It works."
+           when: httpd_status.failed == false
+         - name: Change the port no of webserver 
+           copy:
+             src: /root/ws_ansible/port.conf
+             dest: /etc/httpd/conf.d/ 
+           notify:
+            - Restart service 
+         - name: Start the httpd service
+           service:
+             name: httpd
+             state: started
+         - name: Enable the httpd Service
+           service:
+             name: httpd
+             enabled: yes
+  handlers:
+      - name: Restart service
+          service:
+             name: httpd
+             state: restarted
